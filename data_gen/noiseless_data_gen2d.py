@@ -6,17 +6,25 @@ from pyeit.eit.fem import EITForward
 from pyeit.mesh import create, set_perm
 from pyeit.mesh.wrapper import PyEITAnomaly_Circle
 import random
+import datetime
+import csv
 
 if __name__ == "__main__":
+
+    perm_csv_filename="perm_vals.csv"
+    v1_csv_filename="v1_vals.csv"
+
+    perm_vals=[]
+    v1_vals=[]
 
     zero_tumor_record_count=2
     one_tumor_record_count=2
     two_tumor_record_count=2
 
     tumor_count={
-        "zero":zero_tumor_record_count,
-        "one":one_tumor_record_count,
-        "two":two_tumor_record_count
+        0:zero_tumor_record_count,
+        1:one_tumor_record_count,
+        2:two_tumor_record_count
     }
 
     tissue_perm=(4,6) #breast tissue
@@ -46,7 +54,7 @@ if __name__ == "__main__":
             tissue_perm_rand=random.uniform(min(tissue_perm),max(tissue_perm))
             tumor_perm_rand=random.uniform(min(tumor_perm),max(tumor_perm))
 
-            if t_count =="zero":
+            if t_count ==0:
                 invisible_tumor=PyEITAnomaly_Circle(center=[0,0], r=0,perm=tissue_perm_rand)
 
                 mesh_new=set_perm(mesh_obj,anomaly=invisible_tumor,background=tissue_perm_rand)
@@ -60,7 +68,7 @@ if __name__ == "__main__":
                     PyEITAnomaly_Circle(center=[r1, r2], r=r3, perm=tumor_perm_rand)
                 ]
 
-                if t_count=="two":
+                if t_count==2:
                     r4 = random.uniform(-0.8,0.8) #tumor2 x coord
                     r5 = random.uniform(-0.8,0.8) #tumor2 y coord
                     r6 = random.uniform(0.1,0.2) #tumor 2 radius
@@ -75,6 +83,9 @@ if __name__ == "__main__":
             fwd = EITForward(mesh_obj, protocol_obj)
             v1 = fwd.solve_eit(perm=mesh_new.perm)
 
+            perm_vals.append([mesh_new.perm.tolist()])
+            v1_vals.append([t_count,v1])
+
             # plot
             fig, ax = plt.subplots(figsize=(9, 6))
             im = ax.tripcolor(xx, yy, tri, np.real(mesh_new.perm),  edgecolors="k", cmap="Reds", vmin=0, vmax=max(tissue_perm))
@@ -88,6 +99,15 @@ if __name__ == "__main__":
             fig.colorbar(im)
             plt.show(block=True)
 
-            # Export data to excel*****
+    # Write the data to the CSV file
+    with open(perm_csv_filename, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(perm_vals)
+
+    with open(v1_csv_filename,'w',newline='') as file:
+        writer=csv.writer(file)
+        writer.writerows(v1_vals)
+
+    # print(f"Data has been written to '{csv_file}'")
 
         
