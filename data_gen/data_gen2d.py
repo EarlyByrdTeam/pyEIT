@@ -107,7 +107,7 @@ if __name__ == "__main__":
                 # create new mesh
                 mesh_new=set_perm(mesh_obj,anomaly=anomaly,background=bknd_perm)
 
-            protocol_obj = protocol.create(n_el, dist_exc=1, step_meas=2, parser_meas="std")
+            protocol_obj = protocol.create(n_el, dist_exc=1, step_meas=1, parser_meas="std")
             fwd = EITForward(mesh_obj, protocol_obj)
             v1 = fwd.solve_eit(perm=mesh_new.perm)
             v1 = v1.tolist()
